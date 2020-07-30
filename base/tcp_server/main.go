@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net"
+	"strings"
 )
 
 func main() {
@@ -30,12 +31,17 @@ func main() {
 func process(conn net.Conn) {
 	defer conn.Close()
 	for {
-		var data [256]byte
-		n, err := conn.Read(data[:])
+		var data [1024]byte
+		_, err := conn.Read(data[:])
 		if err != nil {
 			fmt.Printf("read from client failed err:%v\n", err)
 			break
 		}
-		fmt.Printf("received msg from: %v\n", string(data[:n]))
+		msg := string(data[:])
+		splitMsg := strings.Split(msg, "\r\n")
+		requestRAW := strings.Split(splitMsg[0], " ")
+		fmt.Printf("Request Method is: %s\n", requestRAW[0])
+		fmt.Printf("Resuest Param is: %s\n", requestRAW[1])
+		fmt.Printf("HTTP Version is: %s\n", requestRAW[2])
 	}
 }
